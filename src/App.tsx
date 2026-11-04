@@ -253,7 +253,7 @@ type SidebarView = 'all-agreements' | 'drafts' | 'in-progress' | 'completed' | '
 type TemplatesSidebarView = 'my-templates' | 'shared-with-me' | 'favorites' | 'all-templates' | 'clauses' | 'document-templates' | 'workspace-templates' | 'workflow-templates' | 'my-web-forms' | 'shared-web-forms' | 'all-web-forms' | 'template-gallery' | 'elastic-templates';
 type InsightsSidebarView = 'overview' | 'dashboards' | 'reports' | 'my-dashboard' | 'admin-dashboard' | 'agreements-dashboard' | 'obligations-dashboard' | 'renewals-dashboard' | 'requests-dashboard' | 'ai-usage-dashboard' | 'procurement-hub' | 'custom-obligations' | 'custom-dashboard';
 
-/* ═════════════��══════════��══════════════
+/* ═════════════���══════════��══════════════
    Agreements Data
    ═══════════════════════════════════════ */
 
@@ -586,7 +586,7 @@ const personColumns: DataTableColumn<Person>[] = [
 
 const PARTY_FILTER_ALL = 'All';
 
-/* ── Parties store: module-level so merges survive navigating between views ── */
+/* ── Parties store: module-level so merges survive navigating between views ─��� */
 interface PartiesState { organizations: Organization[]; people: Person[] }
 let partiesState: PartiesState = { organizations: ORGANIZATIONS_DATA, people: PEOPLE_DATA };
 const partiesListeners = new Set<() => void>();
@@ -4467,6 +4467,7 @@ function EmployeeFileWorkspace({ employee, onBack, initialDocId }: { employee: E
   const [groupBy, setGroupBy] = useState<'Type' | 'Recency'>('Type');
   const [selectedId, setSelectedId] = useState<string>(() => (initialDocId && docs.some(doc => doc.id === initialDocId) ? initialDocId : null) ?? [...docs].filter(doc => doc.type === EMPLOYEE_DOC_TYPES[0]).sort((a, b) => a.ageDays - b.ageDays)[0]?.id ?? docs[0]?.id ?? '');
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [docQuery, setDocQuery] = useState('');
   const initials = employee.name.split(' ').map(part => part[0]).join('').slice(0, 2);
   const completed = docs.filter(doc => doc.status === 'Completed').length;
   const waiting = docs.filter(doc => doc.status === 'Out for signature').length;
@@ -4525,7 +4526,7 @@ function EmployeeFileWorkspace({ employee, onBack, initialDocId }: { employee: E
   const groups = groupOrder
     .map(label => ({
       label,
-      items: docs.filter(doc => (!statusFilter || doc.status === statusFilter) && (groupBy === 'Type' ? doc.type : getEmployeeDocRecency(doc.ageDays)) === label).sort((a, b) => a.ageDays - b.ageDays),
+      items: docs.filter(doc => (!statusFilter || doc.status === statusFilter) && (!docQuery.trim() || `${doc.name} ${doc.type}`.toLowerCase().includes(docQuery.trim().toLowerCase())) && (groupBy === 'Type' ? doc.type : getEmployeeDocRecency(doc.ageDays)) === label).sort((a, b) => a.ageDays - b.ageDays),
     }))
     .filter(group => group.items.length > 0);
   const flatDocs = groups.flatMap(group => group.items);
@@ -4621,9 +4622,10 @@ function EmployeeFileWorkspace({ employee, onBack, initialDocId }: { employee: E
               <Button kind="secondary" size="small" menuTrigger>Group by: {groupBy}</Button>
             </Dropdown>
           </Inline>
-          {groups.length === 0 && <Text size="sm" color="secondary" role="status">No documents match this status.</Text>}
+          <SearchInput aria-label={`Search documents in ${employee.name}'s file`} placeholder="Search this employee's documents" size="medium" value={docQuery} onChange={setDocQuery} />
+          {groups.length === 0 && <Text size="sm" color="secondary" role="status">{docQuery.trim() ? `No documents match "${docQuery.trim()}"${statusFilter ? ` with status ${statusFilter.toLowerCase()}` : ''}.` : 'No documents match this status.'}</Text>}
           <Accordion
-            key={`${groupBy}-${statusFilter ?? 'all'}`}
+            key={`${groupBy}-${statusFilter ?? 'all'}-${docQuery.trim() ? 'search' : 'all'}`}
             defaultOpenItems={groups.map(group => group.label)}
             items={groups.map(group => ({
               id: group.label,

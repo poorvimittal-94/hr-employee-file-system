@@ -253,7 +253,7 @@ type SidebarView = 'all-agreements' | 'drafts' | 'in-progress' | 'completed' | '
 type TemplatesSidebarView = 'my-templates' | 'shared-with-me' | 'favorites' | 'all-templates' | 'clauses' | 'document-templates' | 'workspace-templates' | 'workflow-templates' | 'my-web-forms' | 'shared-web-forms' | 'all-web-forms' | 'template-gallery' | 'elastic-templates';
 type InsightsSidebarView = 'overview' | 'dashboards' | 'reports' | 'my-dashboard' | 'admin-dashboard' | 'agreements-dashboard' | 'obligations-dashboard' | 'renewals-dashboard' | 'requests-dashboard' | 'ai-usage-dashboard' | 'procurement-hub' | 'custom-obligations' | 'custom-dashboard';
 
-/* ════════════════════════��══════════════
+/* ═════════════��══════════��══════════════
    Agreements Data
    ═══════════════════════════════════════ */
 
@@ -4461,11 +4461,11 @@ function getEmployeeDocRecency(ageDays: number): string {
   return 'Prior years';
 }
 
-function EmployeeFileWorkspace({ employee, onBack }: { employee: EmployeeFile; onBack: () => void }) {
+function EmployeeFileWorkspace({ employee, onBack, initialDocId }: { employee: EmployeeFile; onBack: () => void; initialDocId?: string | null }) {
   const entity = LEGAL_ENTITIES.find(item => item.id === employee.entityId)!;
   const docs = useMemo(() => getEmployeeDocs(employee), [employee]);
   const [groupBy, setGroupBy] = useState<'Type' | 'Recency'>('Type');
-  const [selectedId, setSelectedId] = useState<string>(() => [...docs].filter(doc => doc.type === EMPLOYEE_DOC_TYPES[0]).sort((a, b) => a.ageDays - b.ageDays)[0]?.id ?? docs[0]?.id ?? '');
+  const [selectedId, setSelectedId] = useState<string>(() => (initialDocId && docs.some(doc => doc.id === initialDocId) ? initialDocId : null) ?? [...docs].filter(doc => doc.type === EMPLOYEE_DOC_TYPES[0]).sort((a, b) => a.ageDays - b.ageDays)[0]?.id ?? docs[0]?.id ?? '');
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const initials = employee.name.split(' ').map(part => part[0]).join('').slice(0, 2);
   const completed = docs.filter(doc => doc.status === 'Completed').length;
@@ -4723,6 +4723,56 @@ function EmployeeFileWorkspace({ employee, onBack }: { employee: EmployeeFile; o
   );
 }
 
+interface EmployeeDocMatch { employee: EmployeeFile; doc: EmployeeDoc }
+
+function DocumentSearchResults({ matches, query, onOpen }: { matches: EmployeeDocMatch[]; query: string; onOpen: (employee: EmployeeFile, docId: string) => void }) {
+  const limit = 25;
+  const shown = matches.slice(0, limit);
+  return (
+    <Stack gap="small">
+      <Inline gap="small" align="center" style={{ flexWrap: 'wrap' }}>
+        <Text size="md" weight="semibold" aria-live="polite">
+          {matches.length} {matches.length === 1 ? 'document' : 'documents'} found
+        </Text>
+        <Text size="sm" color="secondary">across employee files matching &ldquo;{query}&rdquo;</Text>
+      </Inline>
+      <Stack gap="small" role="list" aria-label="Document search results">
+        {shown.map(({ employee, doc }) => {
+          const entity = LEGAL_ENTITIES.find(item => item.id === employee.entityId)!;
+          return (
+            <div key={doc.id} role="listitem">
+              <Card radius="medium">
+                <Card.Body>
+                  <Inline gap="large" align="center" justify="between" style={{ flexWrap: 'nowrap' }}>
+                    <Inline gap="medium" align="center" style={{ flex: 1, minWidth: 0, flexWrap: 'nowrap' }}>
+                      <Icon name="document" size={20} color="var(--ink-cobalt-90)" />
+                      <Stack gap="none" style={{ gap: 'var(--ink-spacing-25)', flex: 1, minWidth: 0 }}>
+                        <Inline gap="small" align="center" style={{ flexWrap: 'wrap' }}>
+                          <Text size="sm" weight="semibold">{doc.name}</Text>
+                          <Badge kind={EMPLOYEE_DOC_STATUS_KIND[doc.status]} text={doc.status} />
+                        </Inline>
+                        <Text size="xs" color="secondary">{doc.type} · {formatEmployeeDocDate(doc.ageDays)}</Text>
+                      </Stack>
+                      <Stack gap="none" style={{ gap: 'var(--ink-spacing-25)', flex: 1, minWidth: 0 }}>
+                        <Text size="sm" weight="medium">{employee.name}</Text>
+                        <Text size="xs" color="secondary">{employee.workerId} · {entity.name}</Text>
+                      </Stack>
+                    </Inline>
+                    <Button kind="secondary" size="small" onClick={() => onOpen(employee, doc.id)} aria-label={`Open ${doc.name} in the file for ${employee.name}, worker ID ${employee.workerId}`}>
+                      Open document
+                    </Button>
+                  </Inline>
+                </Card.Body>
+              </Card>
+            </div>
+          );
+        })}
+      </Stack>
+      {matches.length > limit && <Text size="sm" color="secondary">Showing the first {limit} of {matches.length}. Refine your search to narrow the list.</Text>}
+    </Stack>
+  );
+}
+
 function EmployeeSearchResults({ rows, query, onOpen }: { rows: EmployeeFile[]; query: string; onOpen: (employee: EmployeeFile) => void }) {
   const sorted = useMemo(() => [...rows].sort((a, b) => a.name.localeCompare(b.name) || a.workerId.localeCompare(b.workerId)), [rows]);
   const nameCounts = sorted.reduce<Record<string, number>>((acc, employee) => ({ ...acc, [employee.name]: (acc[employee.name] ?? 0) + 1 }), {});
@@ -4837,6 +4887,21 @@ function PeoplePage({ scope, onScopeChange, search, onSearchChange }: {
 }) {
   const [status, setStatus] = useState<'All statuses' | EmployeeStatus>('All statuses');
   const [openedEmployee, setOpenedEmployee] = useState<EmployeeFile | null>(null);
+  const [openedDocId, setOpenedDocId] = useState<string | null>(null);
+
+  const docMatches = useMemo<EmployeeDocMatch[]>(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return [];
+    return EMPLOYEE_FILES_DATA.flatMap(employee => {
+      const entity = LEGAL_ENTITIES.find(item => item.id === employee.entityId)!;
+      const inScope = scope === PEOPLE_ALL_SCOPE || scope === entity.region || scope === entity.id;
+      const matchesStatus = status === 'All statuses' || employee.status === status;
+      if (!inScope || !matchesStatus) return [];
+      return getEmployeeDocs(employee)
+        .filter(doc => `${doc.name} ${doc.type}`.toLowerCase().includes(query))
+        .map(doc => ({ employee, doc }));
+    });
+  }, [scope, search, status]);
 
   const rows = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -4895,7 +4960,7 @@ function PeoplePage({ scope, onScopeChange, search, onSearchChange }: {
   if (openedEmployee) {
     return (
       <AgreementTableView pageHeader={<PageHeader title="Employee Files" />} filterBar={<span />}>
-        <EmployeeFileWorkspace employee={openedEmployee} onBack={() => setOpenedEmployee(null)} />
+        <EmployeeFileWorkspace key={`${openedEmployee.id}-${openedDocId ?? ''}`} employee={openedEmployee} initialDocId={openedDocId} onBack={() => { setOpenedEmployee(null); setOpenedDocId(null); }} />
       </AgreementTableView>
     );
   }
@@ -4912,7 +4977,7 @@ function PeoplePage({ scope, onScopeChange, search, onSearchChange }: {
               </Button>
             </Dropdown>
           }
-          search={{ value: search, onChange: onSearchChange, placeholder: 'Search by employee name' }}
+          search={{ value: search, onChange: onSearchChange, placeholder: 'Search by employee or document name' }}
           filters={
             <Inline gap="small" align="center" style={{ flexWrap: 'nowrap' }}>
               <Dropdown items={(['All statuses', 'Active', 'On leave', 'Pre-hire', 'Terminated'] as const).map(value => ({ label: value, selected: value === status, onClick: () => setStatus(value) }))}>
@@ -4931,7 +4996,12 @@ function PeoplePage({ scope, onScopeChange, search, onSearchChange }: {
             <Text size="sm" weight="medium">{scopeTrail.join(' / ')}</Text>
             <Text size="sm" color="secondary">Results for &ldquo;{search.trim()}&rdquo;</Text>
           </Inline>
-          <EmployeeSearchResults rows={rows} query={search.trim()} onOpen={setOpenedEmployee} />
+          {(rows.length > 0 || docMatches.length === 0) && (
+            <EmployeeSearchResults rows={rows} query={search.trim()} onOpen={employee => { setOpenedDocId(null); setOpenedEmployee(employee); }} />
+          )}
+          {docMatches.length > 0 && (
+            <DocumentSearchResults matches={docMatches} query={search.trim()} onOpen={(employee, docId) => { setOpenedDocId(docId); setOpenedEmployee(employee); }} />
+          )}
         </Stack>
       ) : (
       <Stack gap="small">

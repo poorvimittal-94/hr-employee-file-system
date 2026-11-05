@@ -253,7 +253,7 @@ type SidebarView = 'all-agreements' | 'drafts' | 'in-progress' | 'completed' | '
 type TemplatesSidebarView = 'my-templates' | 'shared-with-me' | 'favorites' | 'all-templates' | 'clauses' | 'document-templates' | 'workspace-templates' | 'workflow-templates' | 'my-web-forms' | 'shared-web-forms' | 'all-web-forms' | 'template-gallery' | 'elastic-templates';
 type InsightsSidebarView = 'overview' | 'dashboards' | 'reports' | 'my-dashboard' | 'admin-dashboard' | 'agreements-dashboard' | 'obligations-dashboard' | 'renewals-dashboard' | 'requests-dashboard' | 'ai-usage-dashboard' | 'procurement-hub' | 'custom-obligations' | 'custom-dashboard';
 
-/* ═════════════�����══════════��══════════════
+/* ═════════════�������══════════��══════════════
    Agreements Data
    ═══════════════════════════════════════ */
 
@@ -522,12 +522,13 @@ const ORGANIZATIONS_DATA: Organization[] = [
   { id: 'org1', name: 'Acme Corporation', role: 'Customer', side: 'External', location: 'San Francisco, US', activeAgreements: 12, totalAgreements: 48 },
   { id: 'org2', name: 'Northwind Traders', role: 'Vendor', side: 'External', location: 'Seattle, US', activeAgreements: 7, totalAgreements: 31 },
   { id: 'org3', name: 'Northwind Trading Co.', role: 'Vendor', side: 'External', location: 'Seattle, US', activeAgreements: 2, totalAgreements: 6 },
-  { id: 'org4', name: 'Protolab', role: 'Company', side: 'Internal', location: 'San Francisco, US', activeAgreements: 41, totalAgreements: 212 },
+  { id: 'org4', name: 'Fontara', role: 'Company', side: 'Internal', location: 'San Francisco, US', activeAgreements: 82, totalAgreements: 92 },
+  { id: 'org15', name: 'Fontara Retail', role: 'Subsidiary', side: 'Internal', location: 'San Francisco, US', activeAgreements: 2, totalAgreements: 3 },
   { id: 'org5', name: 'Contoso Ltd.', role: 'Partner', side: 'External', location: 'London, UK', activeAgreements: 5, totalAgreements: 19 },
   { id: 'org6', name: 'Fabrikam Industries', role: 'Customer', side: 'External', location: 'Chicago, US', activeAgreements: 9, totalAgreements: 27 },
   { id: 'org7', name: 'Globex Logistics', role: 'Vendor', side: 'External', location: 'Rotterdam, NL', activeAgreements: 3, totalAgreements: 14 },
   { id: 'org8', name: 'Initech Systems', role: 'Partner', side: 'External', location: 'Austin, US', activeAgreements: 4, totalAgreements: 11 },
-  { id: 'org9', name: 'Protolab EMEA GmbH', role: 'Subsidiary', side: 'Internal', location: 'Munich, DE', activeAgreements: 14, totalAgreements: 58 },
+  { id: 'org9', name: 'Fontara – EMEA', role: 'Subsidiary', side: 'Internal', location: 'Munich, DE', activeAgreements: 71, totalAgreements: 83 },
   { id: 'org10', name: 'Umbrella Health', role: 'Customer', side: 'External', location: 'Boston, US', activeAgreements: 6, totalAgreements: 22 },
   { id: 'org11', name: 'Stark Capital Partners', role: 'Investor', side: 'External', location: 'New York, US', activeAgreements: 1, totalAgreements: 4 },
   { id: 'org12', name: 'Wayne Facilities Group', role: 'Vendor', side: 'External', location: 'Toronto, CA', activeAgreements: 8, totalAgreements: 35 },
@@ -539,25 +540,30 @@ const PEOPLE_DATA: Person[] = [
   { id: 'p1', name: 'Priya Raman', email: 'priya.raman@acme.example', organization: 'Acme Corporation', title: 'VP, Procurement', side: 'External', activeAgreements: 6 },
   { id: 'p2', name: 'Priya Ramaswamy', email: 'p.ramaswamy@acme.example', organization: 'Acme Corporation', title: 'Procurement Lead', side: 'External', activeAgreements: 2 },
   { id: 'p3', name: 'Daniel Okafor', email: 'daniel.okafor@northwind.example', organization: 'Northwind Traders', title: 'Account Director', side: 'External', activeAgreements: 4 },
-  { id: 'p4', name: 'Akshat Mishra', email: 'akshat.mishra@protolab.example', organization: 'Protolab', title: 'Product Designer', side: 'Internal', activeAgreements: 18 },
-  { id: 'p5', name: 'Marta Lindqvist', email: 'marta.lindqvist@protolab.example', organization: 'Protolab EMEA GmbH', title: 'Legal Counsel', side: 'Internal', activeAgreements: 11 },
+  { id: 'p4', name: 'Akshat Mishra', email: 'akshat.mishra@fontara.com', organization: 'Fontara', title: 'Product Designer', side: 'Internal', activeAgreements: 18 },
+  { id: 'p5', name: 'Marta Lindqvist', email: 'marta.lindqvist@fontara.com', organization: 'Fontara – EMEA', title: 'Legal Counsel', side: 'Internal', activeAgreements: 11 },
   { id: 'p6', name: 'Chen Wei', email: 'chen.wei@contoso.example', organization: 'Contoso Ltd.', title: 'Partnerships Manager', side: 'External', activeAgreements: 3 },
   { id: 'p7', name: 'Hannah Becker', email: 'hannah.becker@fabrikam.example', organization: 'Fabrikam Industries', title: 'Chief Operating Officer', side: 'External', activeAgreements: 5 },
   { id: 'p8', name: 'Samuel Adeyemi', email: 'samuel.adeyemi@globex.example', organization: 'Globex Logistics', title: 'Contracts Administrator', side: 'External', activeAgreements: 2 },
   { id: 'p9', name: 'Lucia Fernandez', email: 'lucia.fernandez@initech.example', organization: 'Initech Systems', title: 'Head of Alliances', side: 'External', activeAgreements: 3 },
-  { id: 'p10', name: 'Tomas Novak', email: 'tomas.novak@protolab.example', organization: 'Protolab EMEA GmbH', title: 'Sales Operations', side: 'Internal', activeAgreements: 9 },
+  { id: 'p10', name: 'Tomas Novak', email: 'tomas.novak@fontara.com', organization: 'Fontara – EMEA', title: 'Sales Operations', side: 'Internal', activeAgreements: 9 },
   { id: 'p11', name: 'Grace Whitfield', email: 'grace.whitfield@umbrella.example', organization: 'Umbrella Health', title: 'Compliance Officer', side: 'External', activeAgreements: 4 },
   { id: 'p12', name: 'Omar Haddad', email: 'omar.haddad@hooli.example', organization: 'Hooli Cloud', title: 'Enterprise Account Manager', side: 'External', activeAgreements: 7 },
   { id: 'p13', name: 'Ines Duarte', email: 'ines.duarte@wayne.example', organization: 'Wayne Facilities Group', title: 'Facilities Director', side: 'External', activeAgreements: 5 },
   { id: 'p14', name: 'Rhea Kapoor', email: 'rhea.kapoor@stark.example', organization: 'Stark Capital Partners', title: 'Investment Associate', side: 'External', activeAgreements: 1 },
-  { id: 'p15', name: 'Jonas Albrecht', email: 'jonas.albrecht@protolab.example', organization: 'Protolab', title: 'Finance Manager', side: 'Internal', activeAgreements: 13 },
+  { id: 'p15', name: 'Jonas Albrecht', email: 'jonas.albrecht@fontara.com', organization: 'Fontara', title: 'Finance Manager', side: 'Internal', activeAgreements: 13 },
   { id: 'p16', name: 'Keiko Tanaka', email: 'keiko.tanaka@soylent.example', organization: 'Soylent Foods', title: 'Purchasing Manager', side: 'External', activeAgreements: 0 },
 ];
 
 const initialsOf = (name: string) => name.split(' ').map((part) => part[0]).slice(0, 2).join('').toUpperCase();
 
-const organizationColumns: DataTableColumn<Organization>[] = [
-  { key: 'name', header: 'Organization', sortable: true, width: '28%', cell: (row) => <Text size="sm" weight="semibold">{row.name}</Text> },
+const getOrganizationColumns = (onOpen: (organization: Organization) => void): DataTableColumn<Organization>[] => [
+  {
+    key: 'name', header: 'Organization', sortable: true, width: '28%',
+    cell: (row) => getOrganizationEntityIds(row.name).length > 0
+      ? <Button kind="tertiary" size="small" onClick={() => onOpen(row)} aria-label={`Open ${row.name} and view its employees`}>{row.name}</Button>
+      : <Text size="sm" weight="semibold">{row.name}</Text>,
+  },
   { key: 'role', header: 'Role', sortable: true, cell: (row) => <Text size="sm">{row.role}</Text> },
   { key: 'side', header: 'Party side', sortable: true, cell: (row) => <Badge kind={row.side === 'Internal' ? 'emphasis' : 'subtle'}>{row.side}</Badge> },
   { key: 'location', header: 'Location', sortable: true, cell: (row) => <Text size="sm" color="secondary">{row.location}</Text> },
@@ -891,12 +897,127 @@ function PartyFilterMenu({ label, value, options, onChange }: { label: string; v
   );
 }
 
-function PartiesPage(props: { view: PartiesView; onAskIris: () => void }) {
+interface PartiesPageProps {
+  view: PartiesView;
+  onAskIris: () => void;
+  initialOrganizationId?: string | null;
+  onOpenEmployee?: (employee: EmployeeFile, organization: Organization) => void;
+}
+
+function PartiesPage(props: PartiesPageProps) {
   return <ToastProvider><PartiesPageContent {...props} /></ToastProvider>;
 }
 
-function PartiesPageContent({ view, onAskIris }: { view: PartiesView; onAskIris: () => void }) {
+type EmployeeStatusFilter = 'All statuses' | EmployeeStatus;
+
+function OrganizationEmployeesView({ organization, onBack, onOpenEmployee }: { organization: Organization; onBack: () => void; onOpenEmployee: (employee: EmployeeFile) => void }) {
+  const entityIds = getOrganizationEntityIds(organization.name);
+  const scopedEntities = LEGAL_ENTITIES.filter(entity => entityIds.includes(entity.id));
+  const [search, setSearch] = useState('');
+  const [region, setRegion] = useState<'All regions' | PeopleRegion>('All regions');
+  const [entityId, setEntityId] = useState('all');
+  const [status, setStatus] = useState<EmployeeStatusFilter>('All statuses');
+  const [sort, setSort] = useState<{ column?: string; direction: 'ascending' | 'descending' | null }>({ direction: null });
+
+  const scoped = EMPLOYEE_FILES_DATA.filter(employee => entityIds.includes(employee.entityId));
+  const q = search.trim().toLowerCase();
+  const rows = scoped
+    .filter(employee => {
+      const entity = LEGAL_ENTITIES.find(item => item.id === employee.entityId)!;
+      return (region === 'All regions' || entity.region === region)
+        && (entityId === 'all' || employee.entityId === entityId)
+        && (status === 'All statuses' || employee.status === status)
+        && (!q || `${employee.name} ${employee.workerId} ${employee.email}`.toLowerCase().includes(q));
+    })
+    .sort((a, b) => {
+      if (!sort.direction || !sort.column) return a.name.localeCompare(b.name) || a.workerId.localeCompare(b.workerId);
+      const key = sort.column as 'name' | 'workerId';
+      const result = String(a[key]).localeCompare(String(b[key]));
+      return sort.direction === 'ascending' ? result : -result;
+    });
+  const filtersActive = region !== 'All regions' || entityId !== 'all' || status !== 'All statuses' || q !== '';
+  const clearAll = () => { setSearch(''); setRegion('All regions'); setEntityId('all'); setStatus('All statuses'); };
+
+  const columns: DataTableColumn<EmployeeFile>[] = [
+    {
+      key: 'name', header: 'Employee', sortable: true, width: '24%',
+      cell: row => (
+        <Inline gap="small" align="center" style={{ flexWrap: 'nowrap' }}>
+          <Avatar size="small" initials={initialsOf(row.name)} />
+          <Stack gap="none">
+            <Inline gap="small" align="center" style={{ flexWrap: 'nowrap' }}>
+              <Button kind="tertiary" size="small" onClick={() => onOpenEmployee(row)} aria-label={`Open file for ${row.name}, worker ID ${row.workerId}, ${row.location}`}>{row.name}</Button>
+              {isDuplicateEmployeeName(row.name) && <Badge kind="emphasis" text="Same name" />}
+            </Inline>
+            <Text size="xs" color="secondary">{row.workerId}</Text>
+          </Stack>
+        </Inline>
+      ),
+    },
+    { key: 'entity', header: 'Legal entity', cell: row => <Text size="sm">{LEGAL_ENTITIES.find(item => item.id === row.entityId)?.name}</Text> },
+    { key: 'employmentType', header: 'Employment type', cell: row => <Text size="sm">{row.employmentType}</Text> },
+    { key: 'status', header: 'Status', cell: row => <Badge kind={EMPLOYEE_STATUS_KIND[row.status]} text={row.status === 'Terminated' ? 'Ex-employee' : row.status} /> },
+    { key: 'location', header: 'Location', cell: row => <Text size="sm">{row.location}</Text> },
+    { key: 'email', header: 'Work email', cell: row => <Text size="sm">{row.email}</Text> },
+  ];
+
+  const menu = (label: string, value: string, options: { value: string; label: string }[], onChange: (value: string) => void) => (
+    <Dropdown items={options.map(option => ({ label: option.label, onClick: () => onChange(option.value) }))}>
+      <Button kind="secondary" size="small" menuTrigger>{label}: {options.find(option => option.value === value)?.label}</Button>
+    </Dropdown>
+  );
+
+  return (
+    <AgreementTableView
+      paddingVariant="default"
+      pageHeader={
+        <Stack gap="small" style={{ width: '100%' }}>
+          <nav aria-label="Breadcrumb">
+            <Inline gap="small" align="center">
+              <Button kind="tertiary" size="small" onClick={onBack}>Organizations</Button>
+              <Icon name="chevron-right" size={16} />
+              <Text size="sm" weight="medium">{organization.name}</Text>
+            </Inline>
+          </nav>
+          <PageHeader title={organization.name} />
+          <Text size="sm" color="secondary">{organization.role} · {organization.location} · {scoped.length} {scoped.length === 1 ? 'employee' : 'employees'} on file</Text>
+        </Stack>
+      }
+      filterBar={
+        <FilterBar
+          search={{ value: search, onChange: setSearch, placeholder: 'Search by name, worker ID or email...' }}
+          filters={
+            <Inline gap="small" align="center" style={{ flexWrap: 'nowrap' }}>
+              {menu('Region', region, [{ value: 'All regions', label: 'All regions' }, ...PEOPLE_REGIONS.map(item => ({ value: item, label: item }))], value => setRegion(value as 'All regions' | PeopleRegion))}
+              {scopedEntities.length > 1 && menu('Entity', entityId, [{ value: 'all', label: 'All entities' }, ...scopedEntities.map(item => ({ value: item.id, label: item.name }))], setEntityId)}
+              {menu('Status', status, [{ value: 'All statuses', label: 'All statuses' }, { value: 'Active', label: 'Active' }, { value: 'Terminated', label: 'Ex-employee' }], value => setStatus(value as EmployeeStatusFilter))}
+              {filtersActive && <Button kind="tertiary" size="small" onClick={clearAll}>Clear all</Button>}
+            </Inline>
+          }
+        />
+      }
+    >
+      <DataTable
+        columns={columns}
+        data={rows}
+        getRowKey={row => row.id}
+        sortColumn={sort.column}
+        sortDirection={sort.direction}
+        onSortChange={(column: string, direction: 'ascending' | 'descending' | null) => setSort({ column, direction })}
+        emptyMessage={
+          <Stack gap="small" align="center">
+            <Text>{scoped.length === 0 ? `No employee files are on record for ${organization.name} yet` : 'No employees match your search or filters'}</Text>
+            {filtersActive && <Button kind="secondary" size="small" onClick={clearAll}>Clear search and filters</Button>}
+          </Stack>
+        }
+      />
+    </AgreementTableView>
+  );
+}
+
+function PartiesPageContent({ view, onAskIris, initialOrganizationId, onOpenEmployee }: PartiesPageProps) {
   const { toast } = useToast();
+  const [openOrganizationId, setOpenOrganizationId] = useState<string | null>(initialOrganizationId ?? null);
   const { organizations: allOrganizations, people: allPeople } = useSyncExternalStore(subscribeParties, getPartiesState);
   const simulateFailure = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('merge') === 'fail';
   const mergeAttempts = useRef(0);
@@ -1008,6 +1129,11 @@ function PartiesPageContent({ view, onAskIris }: { view: PartiesView; onAskIris:
     pagination: { page: 1, pageSize: 25 as const, totalItems: rowCount, onPageChange: () => {}, onPageSizeChange: () => {}, showInfo: true },
   };
 
+  const openOrganization = isOrganizations ? allOrganizations.find(org => org.id === openOrganizationId) : undefined;
+  if (openOrganization && onOpenEmployee) {
+    return <OrganizationEmployeesView organization={openOrganization} onBack={() => setOpenOrganizationId(null)} onOpenEmployee={employee => onOpenEmployee(employee, openOrganization)} />;
+  }
+
   return (
     <AgreementTableView
       paddingVariant="default"
@@ -1056,7 +1182,7 @@ function PartiesPageContent({ view, onAskIris }: { view: PartiesView; onAskIris:
           {isOrganizations ? 'Organizations appear here once they are part of an agreement.' : 'People appear here once they are added as a recipient on an agreement.'}
         </EmptyState>
       ) : isOrganizations ? (
-        <DataTable {...tableProps} columns={organizationColumns} data={organizations} getRowKey={(row) => row.id} />
+        <DataTable {...tableProps} columns={getOrganizationColumns(org => setOpenOrganizationId(org.id))} data={organizations} getRowKey={(row) => row.id} />
       ) : (
         <DataTable {...tableProps} columns={personColumns} data={people} getRowKey={(row) => row.id} />
       )}
@@ -4361,40 +4487,46 @@ interface EmployeeFile {
   workerId: string;
   email: string;
   entityId: string;
+  employmentType: string;
+  location: string;
   status: EmployeeStatus;
   files: number;
   updated: string;
 }
 
-const PEOPLE_REGIONS: PeopleRegion[] = ['Americas', 'EMEA', 'APAC'];
+const PEOPLE_REGIONS: PeopleRegion[] = ['Americas', 'EMEA'];
 
 const LEGAL_ENTITIES: LegalEntity[] = [
-  { id: 'ent-us', name: 'Docusign, Inc.', region: 'Americas', country: 'United States' },
-  { id: 'ent-ca', name: 'Docusign Canada ULC', region: 'Americas', country: 'Canada' },
-  { id: 'ent-uk', name: 'Docusign UK Ltd', region: 'EMEA', country: 'United Kingdom' },
-  { id: 'ent-de', name: 'Docusign Germany GmbH', region: 'EMEA', country: 'Germany' },
-  { id: 'ent-fr', name: 'Docusign France SAS', region: 'EMEA', country: 'France' },
-  { id: 'ent-jp', name: 'Docusign Japan K.K.', region: 'APAC', country: 'Japan' },
-  { id: 'ent-au', name: 'Docusign Australia Pty Ltd', region: 'APAC', country: 'Australia' },
+  { id: 'ent-fontara', name: 'Fontara', region: 'Americas', country: 'United States' },
+  { id: 'ent-retail', name: 'Fontara Retail', region: 'Americas', country: 'United States' },
+  { id: 'ent-emea', name: 'Fontara – EMEA', region: 'EMEA', country: 'Europe' },
 ];
 
+/** Organization name (as listed under Parties) mapped to the legal entities whose employees it contains. */
+function getOrganizationEntityIds(organizationName: string): string[] {
+  if (organizationName === 'Fontara') return LEGAL_ENTITIES.map(entity => entity.id);
+  const entity = LEGAL_ENTITIES.find(item => item.name === organizationName);
+  return entity ? [entity.id] : [];
+}
+
+function isDuplicateEmployeeName(name: string): boolean {
+  return EMPLOYEE_FILES_DATA.filter(employee => employee.name === name).length > 1;
+}
+
 const EMPLOYEE_FILES_DATA: EmployeeFile[] = [
-  { id: 'emp-1', name: 'Amara Okafor', workerId: 'W-100482', email: 'amara.okafor@protolab.com', entityId: 'ent-us', status: 'Active', files: 14, updated: 'Oct 22, 2026' },
-  { id: 'emp-2', name: 'Daniel Brooks', workerId: 'W-100517', email: 'daniel.brooks@protolab.com', entityId: 'ent-us', status: 'On leave', files: 9, updated: 'Oct 19, 2026' },
-  { id: 'emp-3', name: 'Priya Raman', workerId: 'W-100634', email: 'priya.raman@protolab.com', entityId: 'ent-ca', status: 'Active', files: 11, updated: 'Oct 21, 2026' },
-  { id: 'emp-4', name: 'Hannah Whitfield', workerId: 'W-201207', email: 'hannah.whitfield@protolab.co.uk', entityId: 'ent-uk', status: 'Active', files: 16, updated: 'Oct 20, 2026' },
-  { id: 'emp-5', name: 'Oliver Grant', workerId: 'W-201244', email: 'oliver.grant@protolab.co.uk', entityId: 'ent-uk', status: 'Pre-hire', files: 3, updated: 'Oct 18, 2026' },
-  { id: 'emp-6', name: 'Lena Fischer', workerId: 'W-201390', email: 'lena.fischer@protolab.de', entityId: 'ent-de', status: 'Active', files: 12, updated: 'Oct 15, 2026' },
-  { id: 'emp-7', name: 'Matthias Keller', workerId: 'W-201411', email: 'matthias.keller@protolab.de', entityId: 'ent-de', status: 'Terminated', files: 21, updated: 'Sep 30, 2026' },
-  { id: 'emp-8', name: 'Camille Laurent', workerId: 'W-201502', email: 'camille.laurent@protolab.fr', entityId: 'ent-fr', status: 'Active', files: 10, updated: 'Oct 17, 2026' },
-  { id: 'emp-9', name: 'Haruto Sato', workerId: 'W-300118', email: 'haruto.sato@protolab.jp', entityId: 'ent-jp', status: 'Active', files: 13, updated: 'Oct 22, 2026' },
-  { id: 'emp-10', name: 'Mei Tanaka', workerId: 'W-300146', email: 'mei.tanaka@protolab.jp', entityId: 'ent-jp', status: 'On leave', files: 8, updated: 'Oct 12, 2026' },
-  { id: 'emp-11', name: 'Jack Mitchell', workerId: 'W-300271', email: 'jack.mitchell@protolab.com.au', entityId: 'ent-au', status: 'Active', files: 15, updated: 'Oct 21, 2026' },
-  { id: 'emp-12', name: 'Sofia Alvarez', workerId: 'W-100702', email: 'sofia.alvarez@protolab.com', entityId: 'ent-us', status: 'Active', files: 7, updated: 'Oct 16, 2026' },
-  { id: 'emp-13', name: 'Daniel Brooks', workerId: 'W-201688', email: 'daniel.brooks@protolab.co.uk', entityId: 'ent-uk', status: 'Active', files: 6, updated: 'Oct 20, 2026' },
-  { id: 'emp-14', name: 'Daniel Brooks', workerId: 'W-300352', email: 'daniel.brooks@protolab.com.au', entityId: 'ent-au', status: 'Terminated', files: 18, updated: 'Aug 29, 2026' },
-  { id: 'emp-15', name: 'Priya Raman', workerId: 'W-201733', email: 'priya.raman@protolab.de', entityId: 'ent-de', status: 'Active', files: 9, updated: 'Oct 14, 2026' },
-  { id: 'emp-16', name: 'Priya Raman', workerId: 'W-300390', email: 'priya.raman@protolab.jp', entityId: 'ent-jp', status: 'Pre-hire', files: 2, updated: 'Oct 18, 2026' },
+  { id: 'emp-1', name: 'Amanda Allen', workerId: '21448', email: 'amanda.allen@fontara.com', entityId: 'ent-fontara', employmentType: 'Full-time', location: 'Austin, TX', status: 'Active', files: 12, updated: 'Oct 22, 2026' },
+  { id: 'emp-2', name: 'Ajay Mokashi', workerId: '21219', email: 'ajay.mokashi@dsxtr.com', entityId: 'ent-fontara', employmentType: 'Full-time', location: 'San Francisco, CA', status: 'Active', files: 10, updated: 'Oct 21, 2026' },
+  { id: 'emp-3', name: 'Patricia Rivera', workerId: '21554', email: 'patricia.rivera@dsxtr.com', entityId: 'ent-fontara', employmentType: 'Full-time', location: 'San Francisco, CA', status: 'Active', files: 9, updated: 'Oct 20, 2026' },
+  { id: 'emp-4', name: 'Blake Hayes', workerId: '2938476', email: 'blake.hayes@fontara.com', entityId: 'ent-fontara', employmentType: 'Full-time', location: 'San Francisco, CA', status: 'Active', files: 11, updated: 'Oct 19, 2026' },
+  { id: 'emp-5', name: 'Daniel Garcia', workerId: '0948573', email: 'daniel.garcia@fontara.com', entityId: 'ent-retail', employmentType: 'Part-time', location: 'San Francisco, CA', status: 'Active', files: 7, updated: 'Oct 18, 2026' },
+  { id: 'emp-6', name: 'David Lambert', workerId: '3489735', email: 'david.lambert@fontara.com', entityId: 'ent-retail', employmentType: 'Intern', location: 'Seattle, WA', status: 'Active', files: 3, updated: 'Oct 17, 2026' },
+  { id: 'emp-7', name: 'Fiona Apples', workerId: '1908235', email: 'f.apple@orchardfarm.com', entityId: 'ent-fontara', employmentType: 'Full-time', location: 'San Francisco, CA', status: 'Terminated', files: 21, updated: 'Sep 30, 2026' },
+  { id: 'emp-8', name: 'Fiona Apples', workerId: '1039475', email: 'fiona.apples@fontara.com', entityId: 'ent-fontara', employmentType: 'Full-time', location: 'San Jose, CA', status: 'Active', files: 13, updated: 'Oct 22, 2026' },
+  { id: 'emp-9', name: 'Harry van Leest', workerId: '983402', email: 'harry.vanleest@fontara.com', entityId: 'ent-fontara', employmentType: 'Full-time', location: 'Seattle, WA', status: 'Active', files: 8, updated: 'Oct 16, 2026' },
+  { id: 'emp-10', name: 'John Havering', workerId: '2374503', email: 'john.havering@fontara.com', entityId: 'ent-fontara', employmentType: 'Full-time', location: 'San Francisco, CA', status: 'Active', files: 14, updated: 'Oct 15, 2026' },
+  { id: 'emp-11', name: 'Linda Simon', workerId: '5347802', email: 'linda.simon@fontara.com', entityId: 'ent-fontara', employmentType: 'Fixed term', location: 'Chicago, IL', status: 'Active', files: 6, updated: 'Oct 14, 2026' },
+  { id: 'emp-12', name: 'Mary Wilson', workerId: '2387523', email: 'mary.wilson@fontara.com', entityId: 'ent-fontara', employmentType: 'Full-time', location: 'Chicago, IL', status: 'Active', files: 10, updated: 'Oct 13, 2026' },
+  { id: 'emp-13', name: 'Michael Berger', workerId: '5093487', email: 'michael.berger@fontara.com', entityId: 'ent-fontara', employmentType: 'Full-time', location: 'San Francisco, CA', status: 'Active', files: 15, updated: 'Oct 12, 2026' },
 ];
 
 type EmployeeDocStatus = 'Completed' | 'Out for signature' | 'Needs review';
@@ -4461,7 +4593,9 @@ function getEmployeeDocRecency(ageDays: number): string {
   return 'Prior years';
 }
 
-function EmployeeFileWorkspace({ employee, onBack, initialDocId }: { employee: EmployeeFile; onBack: () => void; initialDocId?: string | null }) {
+interface EmployeeOrigin { organizationName: string; onOrganizations: () => void; onOrganization: () => void }
+
+function EmployeeFileWorkspace({ employee, onBack, initialDocId, origin }: { employee: EmployeeFile; onBack: () => void; initialDocId?: string | null; origin?: EmployeeOrigin | null }) {
   const entity = LEGAL_ENTITIES.find(item => item.id === employee.entityId)!;
   const docs = useMemo(() => getEmployeeDocs(employee), [employee]);
   const [groupBy, setGroupBy] = useState<'Type' | 'Recency'>('Type');
@@ -4540,6 +4674,8 @@ function EmployeeFileWorkspace({ employee, onBack, initialDocId }: { employee: E
     { label: 'Legal entity', value: `${entity.name} (${entity.country})` },
     { label: 'Worker ID', value: employee.workerId },
     { label: 'Work email', value: employee.email },
+    { label: 'Employment type', value: employee.employmentType },
+    { label: 'Location', value: employee.location },
   ];
   const summary: { label: string; value: number | string; filter?: string | null }[] = [
     { label: 'Documents', value: docs.length, filter: null },
@@ -4551,11 +4687,21 @@ function EmployeeFileWorkspace({ employee, onBack, initialDocId }: { employee: E
 
   return (
     <Stack gap="medium">
-      <Inline gap="small" align="center">
-        <Button kind="tertiary" size="small" onClick={onBack}>People</Button>
-        <Icon name="chevron-right" size={16} />
-        <Text size="sm" weight="medium">{employee.name}</Text>
-      </Inline>
+      <nav aria-label="Breadcrumb">
+        <Inline gap="small" align="center">
+          {origin ? (
+            <>
+              <Button kind="tertiary" size="small" onClick={origin.onOrganizations}>Organizations</Button>
+              <Icon name="chevron-right" size={16} />
+              <Button kind="tertiary" size="small" onClick={origin.onOrganization}>{origin.organizationName}</Button>
+            </>
+          ) : (
+            <Button kind="tertiary" size="small" onClick={onBack}>People</Button>
+          )}
+          <Icon name="chevron-right" size={16} />
+          <Text size="sm" weight="medium">{employee.name}</Text>
+        </Inline>
+      </nav>
 
       <Card radius="medium">
         <Card.Body>
@@ -4774,8 +4920,9 @@ function EmployeeDetailsPanel({ employee, entity }: { employee: EmployeeFile; en
       id: 'contact', title: 'Contact information',
       fields: [
         { label: 'Phone', value: `408-456-${seed.slice(-4).padStart(4, '0')}` },
-        { label: 'Work email', value: `${slug}@fontara.com` },
+        { label: 'Work email', value: employee.email },
         { label: 'Personal email', value: `${slug}@gmail.com` },
+        { label: 'Location', value: employee.location },
       ] as { label: string; value: string; source?: string }[],
     },
     {
@@ -4783,7 +4930,7 @@ function EmployeeDetailsPanel({ employee, entity }: { employee: EmployeeFile; en
       fields: [
         { label: 'Applicant ID', value: `65${seed.slice(-3).padStart(3, '0')}`, source: 'Greenhouse' },
         { label: 'Employee ID', value: employee.workerId, source: 'Workday' },
-        { label: 'Employment type', value: 'Full-time' },
+        { label: 'Employment type', value: employee.employmentType },
         { label: 'Status', value: employee.status },
         { label: 'Legal entity', value: entity.name, source: 'Workday' },
         { label: 'Files on record', value: String(employee.files) },
@@ -5009,14 +5156,16 @@ function getPeopleSidebar(scope: string, onScopeChange: (scope: string) => void)
   };
 }
 
-function PeoplePage({ scope, onScopeChange, search, onSearchChange }: {
+function PeoplePage({ scope, onScopeChange, search, onSearchChange, initialEmployeeId, origin }: {
   scope: string;
   onScopeChange: (scope: string) => void;
   search: string;
   onSearchChange: (value: string) => void;
+  initialEmployeeId?: string | null;
+  origin?: EmployeeOrigin | null;
 }) {
   const [status, setStatus] = useState<'All statuses' | EmployeeStatus>('All statuses');
-  const [openedEmployee, setOpenedEmployee] = useState<EmployeeFile | null>(null);
+  const [openedEmployee, setOpenedEmployee] = useState<EmployeeFile | null>(() => EMPLOYEE_FILES_DATA.find(item => item.id === initialEmployeeId) ?? null);
   const [openedDocId, setOpenedDocId] = useState<string | null>(null);
 
   const docMatches = useMemo<EmployeeDocMatch[]>(() => {
@@ -5062,12 +5211,17 @@ function PeoplePage({ scope, onScopeChange, search, onSearchChange }: {
         <Inline gap="small" align="center" style={{ flexWrap: 'nowrap' }}>
           <Icon name="folder" size={20} color="var(--ink-cobalt-90)" />
           <Stack gap="none" style={{ gap: 'var(--ink-spacing-25)', minWidth: 0 }}>
-            <Button kind="tertiary" size="small" onClick={() => setOpenedEmployee(row)} aria-label={`Open file for ${row.name}, worker ID ${row.workerId}`}>{row.name}</Button>
+            <Inline gap="small" align="center" style={{ flexWrap: 'nowrap' }}>
+              <Button kind="tertiary" size="small" onClick={() => setOpenedEmployee(row)} aria-label={`Open file for ${row.name}, worker ID ${row.workerId}, ${row.location}`}>{row.name}</Button>
+              {isDuplicateEmployeeName(row.name) && <Badge kind="emphasis" text="Same name" />}
+            </Inline>
             <Text size="xs" color="secondary">{row.workerId}</Text>
           </Stack>
         </Inline>
       ),
     },
+    { key: 'employmentType', header: 'Employment type', cell: row => <Text size="sm">{row.employmentType}</Text> },
+    { key: 'location', header: 'Location', cell: row => <Text size="sm">{row.location}</Text> },
     {
       key: 'entity',
       header: 'Legal entity',
@@ -5084,13 +5238,12 @@ function PeoplePage({ scope, onScopeChange, search, onSearchChange }: {
     { key: 'status', header: 'Employment status', width: '16%', cell: row => <Badge kind={EMPLOYEE_STATUS_KIND[row.status]} text={row.status} /> },
     { key: 'email', header: 'Work email', cell: row => <Text size="sm">{row.email}</Text> },
     { key: 'files', header: 'Files', width: '8%', sortable: true, cell: row => <Text size="sm">{row.files}</Text> },
-    { key: 'updated', header: 'Last updated', width: '14%', sortable: true, cell: row => <Text size="sm">{row.updated}</Text> },
   ];
 
   if (openedEmployee) {
     return (
       <AgreementTableView pageHeader={<PageHeader title="Employee Files" />} filterBar={<span />}>
-        <EmployeeFileWorkspace key={`${openedEmployee.id}-${openedDocId ?? ''}`} employee={openedEmployee} initialDocId={openedDocId} onBack={() => { setOpenedEmployee(null); setOpenedDocId(null); }} />
+        <EmployeeFileWorkspace key={`${openedEmployee.id}-${openedDocId ?? ''}`} employee={openedEmployee} initialDocId={openedDocId} origin={origin} onBack={() => { setOpenedEmployee(null); setOpenedDocId(null); }} />
       </AgreementTableView>
     );
   }
@@ -5172,6 +5325,8 @@ function PrototypeApp() {
   const [accountSettings, setAccountSettings] = useState<AccountSettings>(DEFAULT_ACCOUNT_SETTINGS);
   const [adminView, setAdminView] = useState<AdminView>(ADMIN_DEFAULT_VIEW);
   const [peopleScope, setPeopleScope] = useState<string>(PEOPLE_ALL_SCOPE);
+  const [orgFlow, setOrgFlow] = useState<{ employeeId: string; organization: Organization } | null>(null);
+  const [returnOrganizationId, setReturnOrganizationId] = useState<string | null>(null);
   const [peopleSearch, setPeopleSearch] = useState('');
   const [sidebarView, setSidebarView] = useState<SidebarView>('completed');
   const [templatesSidebarView, setTemplatesSidebarView] = useState<TemplatesSidebarView>('my-templates');
@@ -5498,7 +5653,7 @@ function PrototypeApp() {
         id: 'people-files',
         hasDivider: true,
         items: [
-          { id: 'people', label: 'People', icon: 'people' as const, onClick: () => { setPeopleScope(PEOPLE_ALL_SCOPE); setSidebarView('people'); } },
+          { id: 'people', label: 'People', icon: 'people' as const, onClick: () => { setOrgFlow(null); setPeopleScope(PEOPLE_ALL_SCOPE); setSidebarView('people'); } },
           ...(sidebarView === 'people' ? PEOPLE_REGIONS.flatMap(region => [
             { id: region, label: region, icon: 'folder' as const, nested: true, onClick: () => setPeopleScope(region) },
             ...LEGAL_ENTITIES.filter(entity => entity.region === region).map(entity => ({
@@ -5512,7 +5667,7 @@ function PrototypeApp() {
         hasDivider: true,
         items: [
           { id: 'parties', label: 'Parties', icon: 'building-person' as const, onClick: () => setSidebarView('parties-organizations') },
-          { id: 'parties-organizations', label: 'Organizations', nested: true, onClick: () => setSidebarView('parties-organizations') },
+          { id: 'parties-organizations', label: 'Organizations', nested: true, onClick: () => { setReturnOrganizationId(null); setOrgFlow(null); setSidebarView('parties-organizations'); } },
           { id: 'parties-people', label: 'People', nested: true, onClick: () => setSidebarView('parties-people') },
           { id: 'requests', label: 'Requests', icon: 'ticket' as const, onClick: () => setSidebarView('requests') },
           { id: 'signatories', label: 'Signatories', icon: 'person-circle' as const },
@@ -5709,7 +5864,9 @@ function PrototypeApp() {
 
   /* ── Agreements content ── */
   const agreementsContent = isPartiesView ? (
-    <PartiesPage key={sidebarView} view={sidebarView === 'parties-people' ? 'people' : 'organizations'} onAskIris={openIris} />
+    <PartiesPage key={sidebarView} view={sidebarView === 'parties-people' ? 'people' : 'organizations'} onAskIris={openIris}
+      initialOrganizationId={returnOrganizationId}
+      onOpenEmployee={(employee, organization) => { setOrgFlow({ employeeId: employee.id, organization }); setPeopleScope(PEOPLE_ALL_SCOPE); setSidebarView('people'); }} />
   ) : (
     <AgreementTableView
       paddingVariant={isEnvelopeListView ? 'compact' : 'default'}
@@ -5883,7 +6040,16 @@ function PrototypeApp() {
       onBegin={(kind, files = []) => setHomeCreation({ kind, files })}
     />,
     agreements: sidebarView === 'people'
-      ? <PeoplePage scope={peopleScope} onScopeChange={setPeopleScope} search={peopleSearch} onSearchChange={setPeopleSearch} />
+      ? <PeoplePage
+            key={orgFlow?.employeeId ?? 'people'}
+            scope={peopleScope} onScopeChange={setPeopleScope} search={peopleSearch} onSearchChange={setPeopleSearch}
+            initialEmployeeId={orgFlow?.employeeId}
+            origin={orgFlow ? {
+              organizationName: orgFlow.organization.name,
+              onOrganizations: () => { setOrgFlow(null); setReturnOrganizationId(null); setSidebarView('parties-organizations'); },
+              onOrganization: () => { setReturnOrganizationId(orgFlow.organization.id); setOrgFlow(null); setSidebarView('parties-organizations'); },
+            } : null}
+          />
       : agreementsContent,
     templates: templatesContent,
     automations: <AutomationsPage workflows={workflows} onChange={setWorkflows} view={automationView} onNavigate={setAutomationView} />,

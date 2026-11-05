@@ -253,7 +253,7 @@ type SidebarView = 'all-agreements' | 'drafts' | 'in-progress' | 'completed' | '
 type TemplatesSidebarView = 'my-templates' | 'shared-with-me' | 'favorites' | 'all-templates' | 'clauses' | 'document-templates' | 'workspace-templates' | 'workflow-templates' | 'my-web-forms' | 'shared-web-forms' | 'all-web-forms' | 'template-gallery' | 'elastic-templates';
 type InsightsSidebarView = 'overview' | 'dashboards' | 'reports' | 'my-dashboard' | 'admin-dashboard' | 'agreements-dashboard' | 'obligations-dashboard' | 'renewals-dashboard' | 'requests-dashboard' | 'ai-usage-dashboard' | 'procurement-hub' | 'custom-obligations' | 'custom-dashboard';
 
-/* ═════════════����══════════��══════════════
+/* ═════════════�����══════════��══════════════
    Agreements Data
    ═══════════════════════════════════════ */
 
@@ -4572,9 +4572,15 @@ function EmployeeFileWorkspace({ employee, onBack, initialDocId }: { employee: E
               </Stack>
               <Inline gap="small" align="center" style={{ flexWrap: 'nowrap' }}>
                 <IconButton icon={favorite ? 'star-filled' : 'star'} variant="tertiary" aria-label={favorite ? `Remove ${employee.name} from favorites` : `Add ${employee.name} to favorites`} aria-pressed={favorite} onClick={() => setFavorite(value => !value)} />
-                <Button kind="secondary" size="small">Edit details</Button>
-                <Button kind="secondary" size="small">Upload</Button>
-                <Button kind="secondary" size="small">Share file</Button>
+                <Dropdown
+                  items={[
+                    { label: 'Edit details' },
+                    { label: 'Upload' },
+                    { label: 'Share file' },
+                  ]}
+                >
+                  <Button kind="secondary" size="small" menuTrigger>File actions</Button>
+                </Dropdown>
               </Inline>
             </Inline>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'var(--ink-spacing-200)' }}>

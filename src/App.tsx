@@ -253,7 +253,7 @@ type SidebarView = 'all-agreements' | 'drafts' | 'in-progress' | 'completed' | '
 type TemplatesSidebarView = 'my-templates' | 'shared-with-me' | 'favorites' | 'all-templates' | 'clauses' | 'document-templates' | 'workspace-templates' | 'workflow-templates' | 'my-web-forms' | 'shared-web-forms' | 'all-web-forms' | 'template-gallery' | 'elastic-templates';
 type InsightsSidebarView = 'overview' | 'dashboards' | 'reports' | 'my-dashboard' | 'admin-dashboard' | 'agreements-dashboard' | 'obligations-dashboard' | 'renewals-dashboard' | 'requests-dashboard' | 'ai-usage-dashboard' | 'procurement-hub' | 'custom-obligations' | 'custom-dashboard';
 
-/* ═════════════���══════════��══════════════
+/* ═════════════����══════════��══════════════
    Agreements Data
    ═══════════════════════════════════════ */
 
@@ -4468,6 +4468,8 @@ function EmployeeFileWorkspace({ employee, onBack, initialDocId }: { employee: E
   const [selectedId, setSelectedId] = useState<string>(() => (initialDocId && docs.some(doc => doc.id === initialDocId) ? initialDocId : null) ?? [...docs].filter(doc => doc.type === EMPLOYEE_DOC_TYPES[0]).sort((a, b) => a.ageDays - b.ageDays)[0]?.id ?? docs[0]?.id ?? '');
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [docQuery, setDocQuery] = useState('');
+  const [fileTab, setFileTab] = useState<'documents' | 'details' | 'clauses'>('documents');
+  const [favorite, setFavorite] = useState(false);
   const initials = employee.name.split(' ').map(part => part[0]).join('').slice(0, 2);
   const completed = docs.filter(doc => doc.status === 'Completed').length;
   const waiting = docs.filter(doc => doc.status === 'Out for signature').length;
@@ -4550,7 +4552,7 @@ function EmployeeFileWorkspace({ employee, onBack, initialDocId }: { employee: E
   return (
     <Stack gap="medium">
       <Inline gap="small" align="center">
-        <Button kind="tertiary" size="small" onClick={onBack}>Employee Files</Button>
+        <Button kind="tertiary" size="small" onClick={onBack}>People</Button>
         <Icon name="chevron-right" size={16} />
         <Text size="sm" weight="medium">{employee.name}</Text>
       </Inline>
@@ -4564,10 +4566,16 @@ function EmployeeFileWorkspace({ employee, onBack, initialDocId }: { employee: E
                 <Inline gap="small" align="center" style={{ flexWrap: 'wrap' }}>
                   <Heading level={2}>{employee.name}</Heading>
                   <Badge kind={EMPLOYEE_STATUS_KIND[employee.status]} text={employee.status} />
+                  <AIBadge infoContent={false}>AI-Assisted</AIBadge>
                 </Inline>
                 <Text size="sm" color="secondary">Employee file · {docs.length} documents across {groups.length} {groupBy === 'Type' ? 'types' : 'periods'}</Text>
               </Stack>
-              <Button kind="secondary" size="small">Share file</Button>
+              <Inline gap="small" align="center" style={{ flexWrap: 'nowrap' }}>
+                <IconButton icon={favorite ? 'star-filled' : 'star'} variant="tertiary" aria-label={favorite ? `Remove ${employee.name} from favorites` : `Add ${employee.name} to favorites`} aria-pressed={favorite} onClick={() => setFavorite(value => !value)} />
+                <Button kind="secondary" size="small">Edit details</Button>
+                <Button kind="secondary" size="small">Upload</Button>
+                <Button kind="secondary" size="small">Share file</Button>
+              </Inline>
             </Inline>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 'var(--ink-spacing-200)' }}>
               {identity.map(item => (
@@ -4581,8 +4589,27 @@ function EmployeeFileWorkspace({ employee, onBack, initialDocId }: { employee: E
         </Card.Body>
       </Card>
 
-      <Text size="sm" weight="semibold">Document status</Text>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 'var(--ink-spacing-150)', marginTop: 'calc(var(--ink-spacing-100) * -1)' }} role="group" aria-label="Document summary">
+      <Tabs
+        aria-label={`${employee.name} file sections`}
+        value={fileTab}
+        onChange={id => setFileTab(id as 'documents' | 'details' | 'clauses')}
+        tabs={[{ id: 'documents', label: 'Documents' }, { id: 'details', label: 'Details' }, { id: 'clauses', label: 'Clauses' }]}
+      />
+
+      {fileTab === 'details' && <EmployeeDetailsPanel employee={employee} entity={entity} />}
+      {fileTab === 'clauses' && (
+        <Card radius="medium">
+          <Card.Body>
+            <Stack gap="small">
+              <Text size="md" weight="semibold">Clauses</Text>
+              <Text size="sm" color="secondary">Clauses found in {employee.name.split(' ')[0]}&apos;s signed agreements will appear here once extraction finishes.</Text>
+            </Stack>
+          </Card.Body>
+        </Card>
+      )}
+
+      {fileTab === 'documents' && <Text size="sm" weight="semibold">Document status</Text>}
+      {fileTab === 'documents' && <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 'var(--ink-spacing-150)', marginTop: 'calc(var(--ink-spacing-100) * -1)' }} role="group" aria-label="Document summary">
         {summary.map(item => {
           const card = (
             <Card radius="medium">
@@ -4612,9 +4639,9 @@ function EmployeeFileWorkspace({ employee, onBack, initialDocId }: { employee: E
             </button>
           );
         })}
-      </div>
+      </div>}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 320px', gap: 'var(--ink-spacing-200)', alignItems: 'start' }}>
+      {fileTab === 'documents' && <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 320px', gap: 'var(--ink-spacing-200)', alignItems: 'start' }}>
         <Stack gap="small">
           <Inline gap="small" align="center" justify="between">
             <Text size="md" weight="semibold">Documents</Text>
@@ -4720,8 +4747,103 @@ function EmployeeFileWorkspace({ employee, onBack, initialDocId }: { employee: E
             </Card.Body>
           </Card>
         </aside>
-      </div>
+      </div>}
     </Stack>
+  );
+}
+
+function EmployeeDetailsPanel({ employee, entity }: { employee: EmployeeFile; entity: { name: string } }) {
+  const seed = employee.workerId.replace(/\D/g, '');
+  const slug = employee.name.toLowerCase().replace(/[^a-z ]/g, '').trim().replace(/\s+/g, '.');
+  const verifications = [
+    { label: 'Clear', done: true },
+    { label: 'I-9 Employment Verification', done: employee.status !== 'Pre-hire' },
+  ];
+  const sources = [
+    { name: 'Greenhouse', initial: 'G', background: 'var(--ink-green-70, #068146)' },
+    { name: 'Workday', initial: 'W', background: 'var(--ink-cobalt-90, #4c00fb)' },
+  ];
+  const fieldGroups = [
+    {
+      id: 'contact', title: 'Contact information',
+      fields: [
+        { label: 'Phone', value: `408-456-${seed.slice(-4).padStart(4, '0')}` },
+        { label: 'Work email', value: `${slug}@fontara.com` },
+        { label: 'Personal email', value: `${slug}@gmail.com` },
+      ] as { label: string; value: string; source?: string }[],
+    },
+    {
+      id: 'employee', title: 'Employee details',
+      fields: [
+        { label: 'Applicant ID', value: `65${seed.slice(-3).padStart(3, '0')}`, source: 'Greenhouse' },
+        { label: 'Employee ID', value: employee.workerId, source: 'Workday' },
+        { label: 'Employment type', value: 'Full-time' },
+        { label: 'Status', value: employee.status },
+        { label: 'Legal entity', value: entity.name, source: 'Workday' },
+        { label: 'Files on record', value: String(employee.files) },
+        { label: 'Worker ID', value: employee.workerId },
+      ] as { label: string; value: string; source?: string }[],
+    },
+  ];
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 2fr)', gap: 'var(--ink-spacing-300)', alignItems: 'start' }}>
+      <Stack gap="large">
+        <Stack gap="none" style={{ gap: 'var(--ink-spacing-25)' }}>
+          <Text size="xs" weight="semibold">Name</Text>
+          <Text size="md">{employee.name}</Text>
+        </Stack>
+        <Stack gap="small">
+          <Text size="xs" weight="semibold">Verifications</Text>
+          {verifications.map(item => (
+            <Inline key={item.label} gap="small" align="center" justify="between" style={{ flexWrap: 'nowrap' }}>
+              <Inline gap="small" align="center" style={{ flexWrap: 'nowrap' }}>
+                <Icon name={item.done ? 'check-circle' : 'clock'} size={20} color={item.done ? 'var(--ink-green-70, #068146)' : undefined} />
+                <Text size="sm">{item.label}</Text>
+              </Inline>
+              <Link size="small" href="#" onClick={event => event.preventDefault()}>View verifications</Link>
+            </Inline>
+          ))}
+        </Stack>
+        <Stack gap="small">
+          <Text size="xs" weight="semibold">Data sources</Text>
+          {sources.map(source => (
+            <Card key={source.name} radius="medium">
+              <Card.Body>
+                <Inline gap="small" align="center" justify="between" style={{ flexWrap: 'nowrap' }}>
+                  <Inline gap="small" align="center" style={{ flexWrap: 'nowrap' }}>
+                    <span aria-hidden="true" style={{ width: 28, height: 28, borderRadius: 'var(--ink-radius-50, 4px)', background: source.background, color: 'var(--ink-white, #fff)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: 14 }}>{source.initial}</span>
+                    <Text size="sm" weight="medium">{source.name}</Text>
+                  </Inline>
+                  <Text size="xs" color="secondary">(Synced 2 hours ago)</Text>
+                </Inline>
+              </Card.Body>
+            </Card>
+          ))}
+        </Stack>
+      </Stack>
+
+      <Accordion
+        defaultOpenItems={fieldGroups.map(group => group.id)}
+        items={fieldGroups.map(group => ({
+          id: group.id,
+          title: group.title,
+          subtitle: String(group.fields.length),
+          content: (
+            <Stack gap="medium">
+              {group.fields.map(field => (
+                <Inline key={field.label} gap="medium" align="end" justify="between" style={{ flexWrap: 'nowrap' }}>
+                  <Stack gap="none" style={{ gap: 'var(--ink-spacing-25)' }}>
+                    <Text size="xs" weight="semibold">{field.label}</Text>
+                    <Text size="md">{field.value}</Text>
+                  </Stack>
+                  {field.source && <Text size="xs" color="secondary">Source: <Link size="small" href="#" onClick={event => event.preventDefault()}>{field.source}</Link></Text>}
+                </Inline>
+              ))}
+            </Stack>
+          ),
+        }))}
+      />
+    </div>
   );
 }
 

@@ -253,7 +253,7 @@ type SidebarView = 'all-agreements' | 'drafts' | 'in-progress' | 'completed' | '
 type TemplatesSidebarView = 'my-templates' | 'shared-with-me' | 'favorites' | 'all-templates' | 'clauses' | 'document-templates' | 'workspace-templates' | 'workflow-templates' | 'my-web-forms' | 'shared-web-forms' | 'all-web-forms' | 'template-gallery' | 'elastic-templates';
 type InsightsSidebarView = 'overview' | 'dashboards' | 'reports' | 'my-dashboard' | 'admin-dashboard' | 'agreements-dashboard' | 'obligations-dashboard' | 'renewals-dashboard' | 'requests-dashboard' | 'ai-usage-dashboard' | 'procurement-hub' | 'custom-obligations' | 'custom-dashboard';
 
-/* ═════════════�������══════════��══════════════
+/* ═════════════��������══════════��══════════════
    Agreements Data
    ═══════════════════════════════════════ */
 
@@ -534,7 +534,26 @@ const ORGANIZATIONS_DATA: Organization[] = [
   { id: 'org12', name: 'Wayne Facilities Group', role: 'Vendor', side: 'External', location: 'Toronto, CA', activeAgreements: 8, totalAgreements: 35 },
   { id: 'org13', name: 'Hooli Cloud', role: 'Vendor', side: 'External', location: 'Palo Alto, US', activeAgreements: 11, totalAgreements: 40 },
   { id: 'org14', name: 'Soylent Foods', role: 'Customer', side: 'External', location: 'Denver, US', activeAgreements: 0, totalAgreements: 3 },
+  { id: 'org16', name: 'Müller & Partner GmbH', role: 'Vendor', side: 'External', location: 'Munich, DE', activeAgreements: 1, totalAgreements: 2 },
+  { id: 'org17', name: 'Innovatech AG', role: 'Partner', side: 'External', location: 'Zurich, CH', activeAgreements: 1, totalAgreements: 2 },
+  { id: 'org18', name: 'EuroSoft GmbH', role: 'Vendor', side: 'External', location: 'Berlin, DE', activeAgreements: 1, totalAgreements: 1 },
+  { id: 'org19', name: 'Office Depot, Inc.', role: 'Vendor', side: 'External', location: 'Boca Raton, US', activeAgreements: 3, totalAgreements: 5 },
 ];
+
+/** Lifecycle counts per organization: [expiring, renewing, taking effect]. Organizations not listed have none. */
+const ORGANIZATION_LIFECYCLE: Record<string, [number, number, number]> = {
+  'Fontara': [3, 0, 7],
+  'Fontara – EMEA': [4, 0, 8],
+  'Fontara Retail': [0, 0, 1],
+  'Acme Corporation': [2, 0, 0],
+  'Office Depot, Inc.': [0, 1, 0],
+  'Müller & Partner GmbH': [1, 0, 0],
+  'Innovatech AG': [1, 0, 0],
+};
+const getOrganizationLifecycle = (name: string) => {
+  const [expiring, renewing, takingEffect] = ORGANIZATION_LIFECYCLE[name] ?? [0, 0, 0];
+  return { expiring, renewing, takingEffect };
+};
 
 const PEOPLE_DATA: Person[] = [
   { id: 'p1', name: 'Priya Raman', email: 'priya.raman@acme.example', organization: 'Acme Corporation', title: 'VP, Procurement', side: 'External', activeAgreements: 6 },
@@ -560,15 +579,14 @@ const initialsOf = (name: string) => name.split(' ').map((part) => part[0]).slic
 const getOrganizationColumns = (onOpen: (organization: Organization) => void): DataTableColumn<Organization>[] => [
   {
     key: 'name', header: 'Organization', sortable: true, width: '28%',
-    cell: (row) => getOrganizationEntityIds(row.name).length > 0
-      ? <Button kind="tertiary" size="small" onClick={() => onOpen(row)} aria-label={`Open ${row.name} and view its employees`}>{row.name}</Button>
-      : <Text size="sm" weight="semibold">{row.name}</Text>,
+    cell: (row) => <Button kind="tertiary" size="small" onClick={() => onOpen(row)} aria-label={`Open ${row.name}`}>{row.name}</Button>,
   },
+  { key: 'type', header: 'Type', cell: (row) => <Badge kind={row.side === 'Internal' ? 'emphasis' : 'subtle'}>{row.side === 'Internal' ? 'Internal organization' : 'Organization'}</Badge> },
   { key: 'role', header: 'Role', sortable: true, cell: (row) => <Text size="sm">{row.role}</Text> },
-  { key: 'side', header: 'Party side', sortable: true, cell: (row) => <Badge kind={row.side === 'Internal' ? 'emphasis' : 'subtle'}>{row.side}</Badge> },
-  { key: 'location', header: 'Location', sortable: true, cell: (row) => <Text size="sm" color="secondary">{row.location}</Text> },
-  { key: 'activeAgreements', header: 'Active agreements', sortable: true, cell: (row) => <Text size="sm">{row.activeAgreements}</Text> },
-  { key: 'totalAgreements', header: 'Total agreements', sortable: true, cell: (row) => <Text size="sm">{row.totalAgreements}</Text> },
+  { key: 'activeAgreements', header: 'Active', sortable: true, cell: (row) => <Text size="sm">{row.activeAgreements}</Text> },
+  { key: 'expiring', header: 'Expiring', cell: (row) => <Text size="sm">{getOrganizationLifecycle(row.name).expiring}</Text> },
+  { key: 'renewing', header: 'Renewing', cell: (row) => <Text size="sm">{getOrganizationLifecycle(row.name).renewing}</Text> },
+  { key: 'takingEffect', header: 'Taking effect', cell: (row) => <Text size="sm">{getOrganizationLifecycle(row.name).takingEffect}</Text> },
 ];
 
 const personColumns: DataTableColumn<Person>[] = [
@@ -910,7 +928,192 @@ function PartiesPage(props: PartiesPageProps) {
 
 type EmployeeStatusFilter = 'All statuses' | EmployeeStatus;
 
-function OrganizationEmployeesView({ organization, onBack, onOpenEmployee }: { organization: Organization; onBack: () => void; onOpenEmployee: (employee: EmployeeFile) => void }) {
+type OrganizationTab = 'overview' | 'agreements' | 'obligations' | 'people' | 'details';
+type OrganizationAgreementStatus = 'Active' | 'Expiring' | 'Renewing' | 'Taking effect';
+interface OrganizationAgreement { id: string; name: string; type: string; status: OrganizationAgreementStatus; date: string; counterparty: string }
+
+const INTERNAL_AGREEMENT_TYPES = ['Offer Letter', 'Employment Contract', 'CIIAA', 'NDA', 'I-9', 'Background Check', 'Handbook', 'Separation Agreement', 'Relocation Agreement'];
+const EXTERNAL_AGREEMENT_TYPES = ['Master Services Agreement', 'Statement of Work', 'NDA', 'Order Form', 'Data Processing Addendum'];
+const ORG_STATUS_DATES: Record<OrganizationAgreementStatus, string[]> = {
+  Active: ['Jan 14, 2027', 'Mar 02, 2027', 'Jun 30, 2027', 'Aug 18, 2027', 'Nov 05, 2027', 'Dec 21, 2027'],
+  Expiring: ['Nov 12, 2026', 'Nov 30, 2026', 'Dec 15, 2026', 'Dec 31, 2026'],
+  Renewing: ['Dec 01, 2026', 'Jan 10, 2027'],
+  'Taking effect': ['Nov 02, 2026', 'Nov 09, 2026', 'Nov 16, 2026', 'Nov 23, 2026', 'Dec 01, 2026', 'Dec 07, 2026', 'Dec 14, 2026', 'Dec 21, 2026'],
+};
+
+function getOrganizationCounts(organization: Organization): Record<OrganizationAgreementStatus, number> {
+  const lifecycle = getOrganizationLifecycle(organization.name);
+  return { Active: organization.activeAgreements, Expiring: lifecycle.expiring, Renewing: lifecycle.renewing, 'Taking effect': lifecycle.takingEffect };
+}
+
+function getOrganizationAgreements(organization: Organization): OrganizationAgreement[] {
+  const counts = getOrganizationCounts(organization);
+  const types = organization.side === 'Internal' ? INTERNAL_AGREEMENT_TYPES : EXTERNAL_AGREEMENT_TYPES;
+  const contacts = PEOPLE_DATA.filter(person => person.organization === organization.name);
+  const rows: OrganizationAgreement[] = [];
+  (Object.keys(counts) as OrganizationAgreementStatus[]).forEach(status => {
+    const shown = Math.min(counts[status], ORG_STATUS_DATES[status].length);
+    for (let i = 0; i < shown; i += 1) {
+      const type = types[(i + status.length) % types.length];
+      rows.push({
+        id: `${organization.id}-${status}-${i}`,
+        name: organization.side === 'Internal' ? `${type} – ${EMPLOYEE_FILES_DATA[(i + status.length) % EMPLOYEE_FILES_DATA.length].name}` : `${type} – ${organization.name}`,
+        type, status, date: ORG_STATUS_DATES[status][i],
+        counterparty: organization.side === 'Internal' ? EMPLOYEE_FILES_DATA[(i + status.length) % EMPLOYEE_FILES_DATA.length].name : (contacts[0]?.name ?? organization.name),
+      });
+    }
+  });
+  return rows;
+}
+
+const ORG_STATUS_KIND: Record<OrganizationAgreementStatus, 'success' | 'subtle' | 'emphasis' | 'warning'> = {
+  Active: 'success', Expiring: 'warning', Renewing: 'emphasis', 'Taking effect': 'subtle',
+};
+
+function OrganizationDetailView({ organization, onBack, onOpenEmployee }: { organization: Organization; onBack: () => void; onOpenEmployee: (employee: EmployeeFile) => void }) {
+  const [tab, setTab] = useState<OrganizationTab>('overview');
+  const [statusFilter, setStatusFilter] = useState<OrganizationAgreementStatus | null>(null);
+  const counts = getOrganizationCounts(organization);
+  const agreements = useMemo(() => getOrganizationAgreements(organization), [organization]);
+  const entityIds = getOrganizationEntityIds(organization.name);
+  const employees = EMPLOYEE_FILES_DATA.filter(employee => entityIds.includes(employee.entityId));
+  const contacts = PEOPLE_DATA.filter(person => person.organization === organization.name);
+  const peopleCount = entityIds.length > 0 ? employees.length : contacts.length;
+
+  const pageHeader = (
+    <Stack gap="small" style={{ width: '100%' }}>
+      <nav aria-label="Breadcrumb">
+        <Inline gap="small" align="center">
+          <Button kind="tertiary" size="small" onClick={onBack}>Organizations</Button>
+          <Icon name="chevron-right" size={16} />
+          <Text size="sm" weight="medium">{organization.name}</Text>
+        </Inline>
+      </nav>
+      <Inline gap="small" align="center" style={{ flexWrap: 'wrap' }}>
+        <PageHeader title={organization.name} />
+        <Badge kind={organization.side === 'Internal' ? 'emphasis' : 'subtle'}>{organization.side === 'Internal' ? 'Internal organization' : 'Organization'}</Badge>
+      </Inline>
+      <Text size="sm" color="secondary">{organization.role} · {organization.location} · {organization.activeAgreements} active agreements</Text>
+      <Tabs
+        value={tab}
+        onChange={id => setTab(id as OrganizationTab)}
+        tabs={[
+          { id: 'overview', label: 'Overview' },
+          { id: 'agreements', label: `Agreements (${organization.activeAgreements})` },
+          { id: 'obligations', label: 'Obligations' },
+          { id: 'people', label: `People (${peopleCount})` },
+          { id: 'details', label: 'Details' },
+        ]}
+      />
+    </Stack>
+  );
+
+  if (tab === 'people' && entityIds.length > 0) {
+    return <OrganizationEmployeesView organization={organization} pageHeader={pageHeader} onBack={onBack} onOpenEmployee={onOpenEmployee} />;
+  }
+
+  const statuses: OrganizationAgreementStatus[] = ['Active', 'Expiring', 'Renewing', 'Taking effect'];
+  const statusCards = (interactive: boolean) => (
+    <Grid columns={4} gap="medium">
+      {statuses.map(status => {
+        const selected = statusFilter === status;
+        return (
+          <Card key={status} radius="medium" variant={selected ? 'secondary' : undefined}>
+            <Card.Body>
+              <Stack gap="small">
+                <Text size="sm" color="secondary">{status}</Text>
+                <Text size="xl" weight="semibold">{counts[status]}</Text>
+                {interactive ? (
+                  <Button kind="tertiary" size="small" onClick={() => { setStatusFilter(selected ? null : status); setTab('agreements'); }} aria-pressed={selected}>
+                    {selected ? 'Clear filter' : `Show ${status.toLowerCase()}`}
+                  </Button>
+                ) : null}
+              </Stack>
+            </Card.Body>
+          </Card>
+        );
+      })}
+    </Grid>
+  );
+
+  const visibleAgreements = agreements.filter(item => !statusFilter || item.status === statusFilter);
+  const agreementColumns: DataTableColumn<OrganizationAgreement>[] = [
+    { key: 'name', header: 'Agreement', cell: row => <Text size="sm" weight="medium">{row.name}</Text> },
+    { key: 'type', header: 'Type', cell: row => <Text size="sm">{row.type}</Text> },
+    { key: 'counterparty', header: organization.side === 'Internal' ? 'Employee' : 'Contact', cell: row => <Text size="sm">{row.counterparty}</Text> },
+    { key: 'status', header: 'Status', cell: row => <Badge kind={ORG_STATUS_KIND[row.status]} text={row.status} /> },
+    { key: 'date', header: 'Key date', cell: row => <Text size="sm">{row.date}</Text> },
+  ];
+
+  const obligationRows = agreements.filter(item => item.status !== 'Active').map(item => ({
+    ...item,
+    obligation: item.status === 'Expiring' ? 'Decide on renewal or termination' : item.status === 'Renewing' ? 'Confirm renewal terms' : 'Prepare for the start date',
+  }));
+  const obligationColumns: DataTableColumn<(typeof obligationRows)[number]>[] = [
+    { key: 'obligation', header: 'Obligation', cell: row => <Text size="sm" weight="medium">{row.obligation}</Text> },
+    { key: 'name', header: 'Agreement', cell: row => <Text size="sm">{row.name}</Text> },
+    { key: 'status', header: 'Status', cell: row => <Badge kind={ORG_STATUS_KIND[row.status]} text={row.status} /> },
+    { key: 'date', header: 'Due', cell: row => <Text size="sm">{row.date}</Text> },
+  ];
+
+  const details: [string, string][] = [
+    ['Organization name', organization.name], ['Type', organization.side === 'Internal' ? 'Internal organization' : 'Organization'], ['Role', organization.role],
+    ['Location', organization.location], ['Active agreements', String(organization.activeAgreements)], ['Total agreements', String(organization.totalAgreements)],
+  ];
+
+  const contactColumns: DataTableColumn<Person>[] = [
+    { key: 'name', header: 'Name', cell: row => <Inline gap="small" align="center" style={{ flexWrap: 'nowrap' }}><Avatar size="small" initials={initialsOf(row.name)} /><Text size="sm" weight="medium">{row.name}</Text></Inline> },
+    { key: 'title', header: 'Job title', cell: row => <Text size="sm">{row.title}</Text> },
+    { key: 'email', header: 'Email', cell: row => <Text size="sm">{row.email}</Text> },
+    { key: 'activeAgreements', header: 'Active agreements', cell: row => <Text size="sm">{row.activeAgreements}</Text> },
+  ];
+
+  let body: React.ReactNode;
+  if (tab === 'agreements') {
+    body = (
+      <Stack gap="medium">
+        {statusCards(true)}
+        {statusFilter && <Inline gap="small" align="center"><FilterTag label={`Status: ${statusFilter}`} dismissible onDismiss={() => setStatusFilter(null)} /></Inline>}
+        <DataTable columns={agreementColumns} data={visibleAgreements} getRowKey={row => row.id} stickyHeader emptyMessage="No agreements with this status" />
+        <Text size="xs" color="secondary">Showing {visibleAgreements.length} of {statusFilter ? counts[statusFilter] : organization.activeAgreements + counts.Expiring + counts.Renewing + counts['Taking effect']} agreements.</Text>
+      </Stack>
+    );
+  } else if (tab === 'obligations') {
+    body = <DataTable columns={obligationColumns} data={obligationRows} getRowKey={row => row.id} stickyHeader emptyMessage="No upcoming obligations for this organization" />;
+  } else if (tab === 'people') {
+    body = <DataTable columns={contactColumns} data={contacts} getRowKey={row => row.id} stickyHeader emptyMessage="No people are associated with this organization yet" />;
+  } else if (tab === 'details') {
+    body = (
+      <Card radius="medium"><Card.Body>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 'var(--ink-spacing-200)' }}>
+          {details.map(([label, value]) => <Stack key={label} gap="none"><Text size="xs" color="secondary">{label}</Text><Text size="sm" weight="medium">{value}</Text></Stack>)}
+        </div>
+      </Card.Body></Card>
+    );
+  } else {
+    const preview = entityIds.length > 0 ? employees.slice(0, 4) : [];
+    body = (
+      <Stack gap="large">
+        {statusCards(true)}
+        <Card radius="medium"><Card.Header><Text size="md" weight="semibold">People</Text></Card.Header><Card.Body>
+          <Stack gap="small">
+            {entityIds.length > 0 ? preview.map(employee => (
+              <Inline key={employee.id} gap="small" align="center" justify="between" style={{ flexWrap: 'nowrap' }}>
+                <Inline gap="small" align="center" style={{ flexWrap: 'nowrap' }}><Avatar size="small" initials={initialsOf(employee.name)} /><Text size="sm">{employee.name}</Text><Text size="xs" color="secondary">{employee.workerId}</Text></Inline>
+                <Button kind="tertiary" size="small" onClick={() => onOpenEmployee(employee)} aria-label={`Open file for ${employee.name}, worker ID ${employee.workerId}`}>Open file</Button>
+              </Inline>
+            )) : contacts.length > 0 ? contacts.map(person => <Inline key={person.id} gap="small" align="center"><Avatar size="small" initials={initialsOf(person.name)} /><Text size="sm">{person.name}</Text><Text size="xs" color="secondary">{person.title}</Text></Inline>) : <Text size="sm" color="secondary">No people are associated with this organization yet.</Text>}
+            {peopleCount > 0 && <Button kind="secondary" size="small" onClick={() => setTab('people')}>View all {peopleCount} {peopleCount === 1 ? 'person' : 'people'}</Button>}
+          </Stack>
+        </Card.Body></Card>
+      </Stack>
+    );
+  }
+
+  return <AgreementTableView paddingVariant="default" pageHeader={pageHeader} filterBar={<span />}>{body}</AgreementTableView>;
+}
+
+function OrganizationEmployeesView({ organization, pageHeader, onOpenEmployee }: { organization: Organization; pageHeader: React.ReactNode; onBack: () => void; onOpenEmployee: (employee: EmployeeFile) => void }) {
   const entityIds = getOrganizationEntityIds(organization.name);
   const scopedEntities = LEGAL_ENTITIES.filter(entity => entityIds.includes(entity.id));
   const [search, setSearch] = useState('');
@@ -970,19 +1173,7 @@ function OrganizationEmployeesView({ organization, onBack, onOpenEmployee }: { o
   return (
     <AgreementTableView
       paddingVariant="default"
-      pageHeader={
-        <Stack gap="small" style={{ width: '100%' }}>
-          <nav aria-label="Breadcrumb">
-            <Inline gap="small" align="center">
-              <Button kind="tertiary" size="small" onClick={onBack}>Organizations</Button>
-              <Icon name="chevron-right" size={16} />
-              <Text size="sm" weight="medium">{organization.name}</Text>
-            </Inline>
-          </nav>
-          <PageHeader title={organization.name} />
-          <Text size="sm" color="secondary">{organization.role} · {organization.location} · {scoped.length} {scoped.length === 1 ? 'employee' : 'employees'} on file</Text>
-        </Stack>
-      }
+      pageHeader={pageHeader}
       filterBar={
         <FilterBar
           search={{ value: search, onChange: setSearch, placeholder: 'Search by name, worker ID or email...' }}
@@ -1131,7 +1322,7 @@ function PartiesPageContent({ view, onAskIris, initialOrganizationId, onOpenEmpl
 
   const openOrganization = isOrganizations ? allOrganizations.find(org => org.id === openOrganizationId) : undefined;
   if (openOrganization && onOpenEmployee) {
-    return <OrganizationEmployeesView organization={openOrganization} onBack={() => setOpenOrganizationId(null)} onOpenEmployee={employee => onOpenEmployee(employee, openOrganization)} />;
+    return <OrganizationDetailView organization={openOrganization} onBack={() => setOpenOrganizationId(null)} onOpenEmployee={employee => onOpenEmployee(employee, openOrganization)} />;
   }
 
   return (
@@ -5156,6 +5347,69 @@ function getPeopleSidebar(scope: string, onScopeChange: (scope: string) => void)
   };
 }
 
+function DuplicateIdentityReview({ records, onClose, onKeepSeparate, onMerge }: {
+  records: EmployeeFile[];
+  onClose: () => void;
+  onKeepSeparate: () => void;
+  onMerge: (primaryId: string) => void;
+}) {
+  const [primaryId, setPrimaryId] = useState(() => (records.find(record => record.status === 'Active') ?? records[0]).id);
+  const [confirmed, setConfirmed] = useState(false);
+  const fields: { key: string; label: string; read: (record: EmployeeFile) => string }[] = [
+    { key: 'workerId', label: 'Employee ID', read: record => record.workerId },
+    { key: 'email', label: 'Work email', read: record => record.email },
+    { key: 'status', label: 'Employment status', read: record => record.status === 'Terminated' ? 'Ex-employee' : record.status },
+    { key: 'location', label: 'Location', read: record => record.location },
+    { key: 'entity', label: 'Legal entity', read: record => LEGAL_ENTITIES.find(item => item.id === record.entityId)?.name ?? '' },
+    { key: 'files', label: 'Agreement files', read: record => String(record.files) },
+  ];
+  const differs = (read: (record: EmployeeFile) => string) => new Set(records.map(read)).size > 1;
+  return (
+    <Modal
+      open
+      size="large"
+      title={`Review duplicate records: ${records[0].name}`}
+      onClose={onClose}
+      footer={
+        <Inline justify="end" gap="small">
+          <Button kind="tertiary" onClick={onClose}>Cancel</Button>
+          <Button kind="secondary" onClick={onKeepSeparate}>Keep as separate people</Button>
+          <Button kind="primary" disabled={!confirmed} onClick={() => onMerge(primaryId)}>Merge records</Button>
+        </Inline>
+      }
+    >
+      <Stack gap="medium">
+        <Banner kind="warning" closable={false} lineWrap>
+          Two employee files share the name {records[0].name}. Merging combines their agreements, ID history and personal data into one file and cannot be undone. Only merge if you are sure they are the same person; otherwise keep them separate to avoid exposing one person&apos;s records under another&apos;s identity.
+        </Banner>
+        <div role="table" aria-label="Duplicate record comparison" style={{ display: 'grid', gridTemplateColumns: `160px repeat(${records.length}, minmax(0, 1fr))`, gap: 'var(--ink-spacing-100) var(--ink-spacing-200)', alignItems: 'start' }}>
+          <span />
+          {records.map(record => (
+            <Radio key={record.id} name="duplicate-primary" value={record.id} checked={primaryId === record.id} onChange={() => setPrimaryId(record.id)} label={primaryId === record.id ? 'Primary record' : 'Make primary'} aria-label={`Make ${record.name}, employee ID ${record.workerId}, the primary record`} />
+          ))}
+          {fields.map(field => {
+            const different = differs(field.read);
+            return (
+              <div key={field.key} role="row" style={{ display: 'contents' }}>
+                <Text size="sm" weight="semibold" role="rowheader">{field.label}</Text>
+                {records.map(record => (
+                  <div key={record.id} role="cell">
+                    <Inline gap="small" align="center" style={{ flexWrap: 'wrap' }}>
+                      <Text size="sm" style={{ overflowWrap: 'anywhere' }}>{field.read(record)}</Text>
+                      {different && <Badge kind="warning" text="Differs" />}
+                    </Inline>
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+        </div>
+        <Checkbox label="I verified these records belong to the same person" checked={confirmed} onChange={event => setConfirmed(event.target.checked)} />
+      </Stack>
+    </Modal>
+  );
+}
+
 function PeoplePage({ scope, onScopeChange, search, onSearchChange, initialEmployeeId, origin }: {
   scope: string;
   onScopeChange: (scope: string) => void;
@@ -5167,6 +5421,24 @@ function PeoplePage({ scope, onScopeChange, search, onSearchChange, initialEmplo
   const [status, setStatus] = useState<'All statuses' | EmployeeStatus>('All statuses');
   const [openedEmployee, setOpenedEmployee] = useState<EmployeeFile | null>(() => EMPLOYEE_FILES_DATA.find(item => item.id === initialEmployeeId) ?? null);
   const [openedDocId, setOpenedDocId] = useState<string | null>(null);
+  const [employmentType, setEmploymentType] = useState('All types');
+  const [locationFilter, setLocationFilter] = useState('All locations');
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [duplicateNotice, setDuplicateNotice] = useState<string | null>(null);
+  const [, setVersion] = useState(0);
+  const duplicateRecords = EMPLOYEE_FILES_DATA.filter(employee => isDuplicateEmployeeName(employee.name) && employee.name === 'Fiona Apples');
+  const employmentTypes = [...new Set(EMPLOYEE_FILES_DATA.map(employee => employee.employmentType))].sort();
+  const locations = [...new Set(EMPLOYEE_FILES_DATA.map(employee => employee.location))].sort();
+
+  const mergeDuplicates = (primaryId: string) => {
+    const primary = duplicateRecords.find(record => record.id === primaryId)!;
+    const removed = duplicateRecords.filter(record => record.id !== primaryId);
+    primary.files += removed.reduce((sum, record) => sum + record.files, 0);
+    removed.forEach(record => EMPLOYEE_FILES_DATA.splice(EMPLOYEE_FILES_DATA.indexOf(record), 1));
+    setReviewOpen(false);
+    setDuplicateNotice(`Merged ${removed.length + 1} records into one file for ${primary.name} (employee ID ${primary.workerId}).`);
+    setVersion(value => value + 1);
+  };
 
   const docMatches = useMemo<EmployeeDocMatch[]>(() => {
     const query = search.trim().toLowerCase();
@@ -5189,9 +5461,11 @@ function PeoplePage({ scope, onScopeChange, search, onSearchChange, initialEmplo
       const inScope = scope === PEOPLE_ALL_SCOPE || scope === entity.region || scope === entity.id;
       const matchesStatus = status === 'All statuses' || employee.status === status;
       const matchesSearch = !query || `${employee.name} ${employee.workerId} ${employee.email}`.toLowerCase().includes(query);
-      return inScope && matchesStatus && matchesSearch;
+      const matchesType = employmentType === 'All types' || employee.employmentType === employmentType;
+      const matchesLocation = locationFilter === 'All locations' || employee.location === locationFilter;
+      return inScope && matchesStatus && matchesSearch && matchesType && matchesLocation;
     });
-  }, [scope, search, status]);
+  }, [scope, search, status, employmentType, locationFilter, duplicateNotice]);
 
   const scopeEntity = LEGAL_ENTITIES.find(item => item.id === scope);
   const scopeTrail = scope === PEOPLE_ALL_SCOPE ? ['All regions'] : scopeEntity ? [scopeEntity.region, scopeEntity.name] : [scope];
@@ -5266,7 +5540,13 @@ function PeoplePage({ scope, onScopeChange, search, onSearchChange, initialEmplo
               <Dropdown items={(['All statuses', 'Active', 'On leave', 'Pre-hire', 'Terminated'] as const).map(value => ({ label: value, selected: value === status, onClick: () => setStatus(value) }))}>
                 <Button kind="secondary" size="small" menuTrigger>{status === 'All statuses' ? 'Employment status' : status}</Button>
               </Dropdown>
-              <Button kind="tertiary" size="small" onClick={() => { onSearchChange(''); setStatus('All statuses'); onScopeChange(PEOPLE_ALL_SCOPE); }}>Clear all</Button>
+              <Dropdown items={['All types', ...employmentTypes].map(value => ({ label: value, selected: value === employmentType, onClick: () => setEmploymentType(value) }))}>
+                <Button kind="secondary" size="small" menuTrigger>{employmentType === 'All types' ? 'Employment type' : employmentType}</Button>
+              </Dropdown>
+              <Dropdown items={['All locations', ...locations].map(value => ({ label: value, selected: value === locationFilter, onClick: () => setLocationFilter(value) }))}>
+                <Button kind="secondary" size="small" menuTrigger>{locationFilter === 'All locations' ? 'Location' : locationFilter}</Button>
+              </Dropdown>
+              <Button kind="tertiary" size="small" onClick={() => { onSearchChange(''); setStatus('All statuses'); setEmploymentType('All types'); setLocationFilter('All locations'); onScopeChange(PEOPLE_ALL_SCOPE); }}>Clear all</Button>
             </Inline>
           }
         />
@@ -5288,6 +5568,20 @@ function PeoplePage({ scope, onScopeChange, search, onSearchChange, initialEmplo
         </Stack>
       ) : (
       <Stack gap="small">
+        {duplicateRecords.length > 1 && (
+          <Banner kind="warning" closable={false} lineWrap action={{ label: 'Review duplicates', onClick: () => setReviewOpen(true) }}>
+            {duplicateRecords.length} employee files are named {duplicateRecords[0].name} with different employee IDs. Review them before merging or keeping them separate.
+          </Banner>
+        )}
+        {duplicateNotice && <Banner kind="success" closable lineWrap onClose={() => setDuplicateNotice(null)}>{duplicateNotice}</Banner>}
+        {reviewOpen && duplicateRecords.length > 1 && (
+          <DuplicateIdentityReview
+            records={duplicateRecords}
+            onClose={() => setReviewOpen(false)}
+            onKeepSeparate={() => { setReviewOpen(false); setDuplicateNotice(`Kept the ${duplicateRecords.length} ${duplicateRecords[0].name} records as separate people. They stay flagged so staff compare employee IDs before opening a file.`); }}
+            onMerge={mergeDuplicates}
+          />
+        )}
         <Inline gap="small" align="center" style={{ flexWrap: 'wrap' }}>
           <Icon name="folder-open" size={16} />
           <Text size="sm" weight="medium">{scopeTrail.join(' / ')}</Text>
